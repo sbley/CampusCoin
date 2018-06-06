@@ -21,8 +21,6 @@ export class MetaSenderComponent implements OnInit {
     account: ''
   };
 
-  status = '';
-
   constructor(private web3Service: Web3Service, private matSnackBar: MatSnackBar) {
     console.log('Constructor: ' + web3Service);
   }
