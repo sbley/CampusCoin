@@ -67,6 +67,16 @@ export class MetaSenderComponent implements OnInit {
         this.setStatus('Transaction failed!');
       } else {
         this.setStatus('Transaction complete!');
+
+        // refresh sender's balance
+        const oldBalance = this.model.balance;
+        const loadBalance = async () => {
+          await this.refreshBalance();
+          if (oldBalance !== this.model.balance) {
+            clearInterval(intervalId);
+          }
+        };
+        const intervalId = setInterval(loadBalance, 1000);
       }
     } catch (e) {
       console.log(e);
