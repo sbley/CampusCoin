@@ -1,18 +1,18 @@
-import {Component, OnInit} from '@angular/core';
-import {Web3Service} from '../../util/web3.service';
+import { Component, OnInit } from '@angular/core';
+import { Web3Service } from '../../util/web3.service';
 import { MatSnackBar } from '@angular/material';
 
 declare let require: any;
-const metacoin_artifacts = require('../../../../build/contracts/MetaCoin.json');
+const campuscoin_artifacts = require('../../../../build/contracts/CampusCoin.json');
 
 @Component({
-  selector: 'app-meta-sender',
-  templateUrl: './meta-sender.component.html',
-  styleUrls: ['./meta-sender.component.css']
+  selector: 'app-coin-sender',
+  templateUrl: './coin-sender.component.html',
+  styleUrls: ['./coin-sender.component.css']
 })
-export class MetaSenderComponent implements OnInit {
+export class CoinSenderComponent implements OnInit {
   accounts: string[];
-  MetaCoin: any;
+  CampusCoin: any;
 
   model = {
     amount: 5,
@@ -29,10 +29,8 @@ export class MetaSenderComponent implements OnInit {
     console.log('OnInit: ' + this.web3Service);
     console.log(this);
     this.watchAccount();
-    this.web3Service.artifactsToContract(metacoin_artifacts)
-      .then((MetaCoinAbstraction) => {
-        this.MetaCoin = MetaCoinAbstraction;
-      });
+    this.web3Service.artifactsToContract(campuscoin_artifacts)
+      .then((CampusCoinAbstraction) => this.CampusCoin = CampusCoinAbstraction);
   }
 
   watchAccount() {
@@ -48,8 +46,8 @@ export class MetaSenderComponent implements OnInit {
   }
 
   async sendCoin() {
-    if (!this.MetaCoin) {
-      this.setStatus('Metacoin is not loaded, unable to send transaction');
+    if (!this.CampusCoin) {
+      this.setStatus('CampusCoin is not loaded, unable to send transaction');
       return;
     }
 
@@ -60,23 +58,14 @@ export class MetaSenderComponent implements OnInit {
 
     this.setStatus('Initiating transaction... (please wait)');
     try {
-      const deployedMetaCoin = await this.MetaCoin.deployed();
-      const transaction = await deployedMetaCoin.sendCoin.sendTransaction(receiver, amount, {from: this.model.account});
+      const deployedCampusCoin = await this.CampusCoin.deployed();
+      const transaction = await deployedCampusCoin.sendCoin.sendTransaction(receiver, amount, {from: this.model.account});
 
       if (!transaction) {
         this.setStatus('Transaction failed!');
       } else {
         this.setStatus('Transaction complete!');
-
-        // refresh sender's balance
-        const oldBalance = this.model.balance;
-        const loadBalance = async () => {
-          await this.refreshBalance();
-          if (oldBalance !== this.model.balance) {
-            clearInterval(intervalId);
-          }
-        };
-        const intervalId = setInterval(loadBalance, 1000);
+        this.refreshBalanceIfNeeded();
       }
     } catch (e) {
       console.log(e);
@@ -88,16 +77,27 @@ export class MetaSenderComponent implements OnInit {
     console.log('Refreshing balance');
 
     try {
-      const deployedMetaCoin = await this.MetaCoin.deployed();
-      console.log(deployedMetaCoin);
+      const deployedCampusCoin = await this.CampusCoin.deployed();
+      console.log(deployedCampusCoin);
       console.log('Account', this.model.account);
-      const metaCoinBalance = await deployedMetaCoin.getBalance.call(this.model.account);
-      console.log('Found balance: ' + metaCoinBalance);
-      this.model.balance = metaCoinBalance;
+      const campusCoinBalance = await deployedCampusCoin.balances.call(this.model.account);
+      console.log('Found balance: ' + campusCoinBalance);
+      this.model.balance = campusCoinBalance;
     } catch (e) {
       console.log(e);
       this.setStatus('Error getting balance; see log.');
     }
+  }
+
+  private refreshBalanceIfNeeded() {
+    const oldBalance = this.model.balance;
+    const loadBalance = async () => {
+      await this.refreshBalance();
+      if (oldBalance !== this.model.balance) {
+        clearInterval(intervalId);
+      }
+    };
+    const intervalId = setInterval(loadBalance, 1000);
   }
 
   setAmount(e) {

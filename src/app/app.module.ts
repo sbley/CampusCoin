@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
-import {MetaModule} from './meta/meta.module';
+import { CampuscoinModule } from './campuscoin/campuscoin.module';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
@@ -30,9 +30,10 @@ import {
     BrowserModule,
     FormsModule,
     HttpModule,
-    MetaModule
+    CampuscoinModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
